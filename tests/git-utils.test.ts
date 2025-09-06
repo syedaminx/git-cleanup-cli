@@ -5,6 +5,7 @@ import {
   getLastCommitInfo,
   isBranchMerged,
   getCommitsBehindMain,
+  analyzeBranches,
 } from "../src/git-utils";
 
 describe("runGitCommand", () => {
@@ -133,5 +134,87 @@ describe("getCommitsBehindMain", () => {
     const result = getCommitsBehindMain("feature/user-auth");
     expect(typeof result).toBe("number");
     expect(result).toBeGreaterThanOrEqual(0);
+  });
+});
+
+describe("analyzeBranches", () => {
+  useTestRepo();
+
+  it("should return array of branch info for all branches", () => {
+    const result = analyzeBranches();
+
+    expect(Array.isArray(result)).toBe(true);
+    expect(result.length).toBeGreaterThan(0);
+
+    // Check that each branch has required properties
+    result.forEach((branch) => {
+      expect(branch).toHaveProperty("name");
+      expect(branch).toHaveProperty("lastCommitDate");
+      expect(branch).toHaveProperty("lastCommitHash");
+      expect(branch).toHaveProperty("isMerged");
+      expect(branch).toHaveProperty("commitsBehindMain");
+      expect(branch).toHaveProperty("isStale");
+      expect(branch).toHaveProperty("isCurrent");
+
+      expect(typeof branch.name).toBe("string");
+      expect(branch.lastCommitDate).toBeInstanceOf(Date);
+      expect(typeof branch.isMerged).toBe("boolean");
+      expect(typeof branch.commitsBehindMain).toBe("number");
+      expect(typeof branch.isStale).toBe("boolean");
+      expect(typeof branch.isCurrent).toBe("boolean");
+    });
+  });
+
+  it("identifies current branch correctly", () => {
+    const result = analyzeBranches();
+    const currentBranches = result.filter((branch) => branch.isCurrent);
+
+    expect(currentBranches).toHaveLength(1);
+    expect(currentBranches[0]?.name).toBeTruthy();
+  });
+
+  it("should identify stale branches with custom staleDays", () => {
+    // Use a very small staleDays value to make most branches stale
+    const result = analyzeBranches(1);
+
+    // Should have at least some branches marked as stale
+    const staleBranches = result.filter((branch) => branch.isStale);
+    expect(staleBranches.length).toBeGreaterThan(0);
+  });
+
+  it("should identify merged branches", () => {
+    const result = analyzeBranches();
+
+    // hotfix/critical-bug should be merged
+    const hotfixBranch = result.find(
+      (branch) => branch.name === "hotfix/critical-bug"
+    );
+    if (hotfixBranch) {
+      expect(hotfixBranch.isMerged).toBe(true);
+    }
+  });
+
+  it("should calculate commits behind main correctly", () => {
+    const result = analyzeBranches();
+
+    result.forEach((branch) => {
+      expect(branch.commitsBehindMain).toBeGreaterThan(0);
+
+      // Main branch should have 0 commits behind itself
+      if (branch.name === "main") {
+        expect(branch.commitsBehindMain).toBe(0);
+      }
+    });
+  });
+
+  it("should include expected branches from test repo", () => {
+    const result = analyzeBranches();
+    const branchNames = result.map((branch) => branch.name);
+
+    // Should include the branches we created in our test repo
+    expect(branchNames).toContain("main");
+    expect(branchNames).toContain("feature/user-auth");
+    expect(branchNames).toContain("feature/api-endpoints");
+    expect(branchNames).toContain("old/legacy-code");
   });
 });

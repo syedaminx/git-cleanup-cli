@@ -67,7 +67,7 @@ describe("isBranchMerged", () => {
   useTestRepo();
 
   it("should return true for merged branch", () => {
-    // hotfix/critical-bug was merged into master in our test repo
+    // hotfix/critical-bug was merged into main in our test repo
     const result = isBranchMerged("hotfix/critical-bug");
     expect(result).toBe(true);
   });

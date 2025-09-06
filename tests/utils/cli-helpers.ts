@@ -1,6 +1,10 @@
 import { execSync } from "node:child_process";
 import path from "node:path";
 
+// Regular expression to match ANSI color codes and escape sequences
+// biome-ignore lint/suspicious/noControlCharactersInRegex: Need to remove ANSI escape sequences
+const ANSI_REGEX = /\u001b\[[0-9;]*m/g;
+
 /**
  * Execute the CLI command and return the output
  * @param command - The CLI command to run (e.g., "list", "list --stale-days 7")
@@ -71,7 +75,9 @@ export const runCLIWithInput = (command: string, inputs: string[]) => {
  * @returns Parsed branch information
  */
 export const parseCLIOutput = (output: string) => {
-	const lines = output.split("\n");
+	// Strip ANSI color codes
+	const cleanOutput = output.replace(ANSI_REGEX, "");
+	const lines = cleanOutput.split("\n");
 
 	// Find the table start (after the headers)
 	const tableStartIndex = lines.findIndex(
@@ -98,7 +104,15 @@ export const parseCLIOutput = (output: string) => {
 	// Parse table rows (skip header and separator lines)
 	for (let i = tableStartIndex + 2; i < lines.length; i++) {
 		const line = lines[i].trim();
-		if (!line || line.startsWith("│") === false) continue;
+		if (!line) continue;
+
+		// Stop parsing when we hit the bottom border or other elements
+		if (line.startsWith("└") || line.startsWith("?") || line.startsWith("✔")) {
+			break;
+		}
+
+		// Only process data rows that start with │
+		if (!line.startsWith("│")) continue;
 
 		// Simple table parsing - split by │ and clean up
 		const parts = line

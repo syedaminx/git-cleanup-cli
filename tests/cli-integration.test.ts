@@ -146,4 +146,89 @@ describe("CLI Integration Tests", () => {
 		// --merged=false should give same results as no flag
 		expect(mergedFalseResult.stdout).toBe(noFlagResult.stdout);
 	});
+
+	it("should filter to only current user branches with --my-branches", () => {
+		// First, we need to create a branch with a different author in the test repo
+		// This requires working directly with the test repo
+		const { execSync } = require("node:child_process");
+
+		// Get the test repo path from environment (set by useTestRepo)
+		const testRepoPath = process.cwd();
+
+		// Get current user info
+		const currentUserName = execSync("git config user.name", {
+			encoding: "utf-8",
+			cwd: testRepoPath,
+		}).trim();
+		const currentUserEmail = execSync("git config user.email", {
+			encoding: "utf-8",
+			cwd: testRepoPath,
+		}).trim();
+
+		// Create a test branch with a different author
+		const testBranchForOtherAuthor = "test/cli-different-author-branch";
+		execSync(`git checkout -b ${testBranchForOtherAuthor}`, {
+			cwd: testRepoPath,
+		});
+
+		// Set different author temporarily
+		execSync("git config user.name 'CLI Test Author'", { cwd: testRepoPath });
+		execSync("git config user.email 'cli-test@example.com'", {
+			cwd: testRepoPath,
+		});
+
+		// Create a backdated commit to make it stale
+		const pastDate = new Date();
+		pastDate.setDate(pastDate.getDate() - 400); // 400 days ago
+		const dateStr = pastDate.toISOString();
+
+		execSync(
+			`git commit --allow-empty -m 'CLI test commit by different author'`,
+			{
+				cwd: testRepoPath,
+				env: {
+					...process.env,
+					GIT_AUTHOR_DATE: dateStr,
+					GIT_COMMITTER_DATE: dateStr,
+				},
+			},
+		);
+
+		// Restore original user config
+		execSync(`git config user.name '${currentUserName}'`, {
+			cwd: testRepoPath,
+		});
+		execSync(`git config user.email '${currentUserEmail}'`, {
+			cwd: testRepoPath,
+		});
+
+		// Switch back to main
+		execSync("git checkout main", { cwd: testRepoPath });
+
+		// Test CLI with and without --my-branches
+		const allBranchesResult = runCLI("list --stale-days 365");
+		const myBranchesResult = runCLI("list --stale-days 365 --my-branches");
+
+		expect(allBranchesResult.exitCode).toBe(0);
+		expect(myBranchesResult.exitCode).toBe(0);
+
+		// Should show "your branches" in the analysis message
+		expect(myBranchesResult.stdout).toContain("Analyzing your branches");
+
+		// Parse both outputs to compare
+		const allBranches = parseCLIOutput(allBranchesResult.stdout);
+		const myBranches = parseCLIOutput(myBranchesResult.stdout);
+
+		const allBranchNames = allBranches.branches.map((b) => b.name);
+		const myBranchNames = myBranches.branches.map((b) => b.name);
+
+		// The different-author branch should be in all branches but not in my branches
+		expect(allBranchNames).toContain(testBranchForOtherAuthor);
+		expect(myBranchNames).not.toContain(testBranchForOtherAuthor);
+
+		// Should have fewer or equal branches when filtering to my branches only
+		expect(myBranches.branches.length).toBeLessThanOrEqual(
+			allBranches.branches.length,
+		);
+	});
 });

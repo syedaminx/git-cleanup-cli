@@ -4,6 +4,7 @@ import {
   runGitCommand,
   getLastCommitInfo,
   isBranchMerged,
+  getCommitsBehindMain,
 } from "../src/git-utils";
 
 describe("runGitCommand", () => {
@@ -94,5 +95,43 @@ describe("isBranchMerged", () => {
   it("should return false for non-existent branch", () => {
     const result = isBranchMerged("non-existent-branch");
     expect(result).toBe(false);
+  });
+});
+
+describe("getCommitsBehindMain", () => {
+  useTestRepo();
+
+  it("should return 0 for main branch (not behind itself)", () => {
+    const result = getCommitsBehindMain("main");
+    expect(result).toBe(0);
+  });
+
+  it("should return number of commits behind for feature branches", () => {
+    // Feature branches should be behind main since main has the merge commit
+    const result1 = getCommitsBehindMain("feature/user-auth");
+    const result2 = getCommitsBehindMain("feature/api-endpoints");
+
+    expect(result1).toBeGreaterThanOrEqual(0);
+    expect(result2).toBeGreaterThanOrEqual(0);
+    expect(typeof result1).toBe("number");
+    expect(typeof result2).toBe("number");
+  });
+
+  it("should return 0 for non-existent branch", () => {
+    const result = getCommitsBehindMain("non-existent-branch");
+    expect(result).toBe(0);
+  });
+
+  it("should handle old legacy branch", () => {
+    // The old/legacy-code branch is very old and should be behind main
+    const result = getCommitsBehindMain("old/legacy-code");
+    expect(result).toBeGreaterThanOrEqual(0);
+    expect(typeof result).toBe("number");
+  });
+
+  it("should default to main branch when not specified", () => {
+    const result = getCommitsBehindMain("feature/user-auth");
+    expect(typeof result).toBe("number");
+    expect(result).toBeGreaterThanOrEqual(0);
   });
 });

@@ -10,13 +10,37 @@ export const runGitCommand = (command: string) => {
 	}
 };
 
-const getAllGitBranches = () => {
-	const branches = runGitCommand("git branch");
+const getAllBranchesWithAuthors = (): Array<{
+	name: string;
+	authorName: string;
+	authorEmail: string;
+}> => {
+	const output = runGitCommand(
+		"git for-each-ref --format='%(refname:short)|%(authorname)|%(authoremail)' refs/heads/ --sort=-committerdate",
+	);
 
-	return branches
-		.split("\n")
-		.map((branch) => branch.replace(/^\*?\s+/, "")) // Remove * and whitespace
-		.filter((branch) => branch.length > 0); // Remove empty lines
+	return output
+		.split("\n") // split into lines
+		.map((line) => line.trim()) // trim whitespace
+		.filter((line) => line.length > 0)
+		.map((line) => {
+			const [name, authorName, authorEmail] = line.split("|"); // split into name, author name, and author email
+			return {
+				name: name || "",
+				authorName: authorName || "",
+				authorEmail: authorEmail || "",
+			};
+		});
+};
+
+const getCurrentGitUser = (): { name: string; email: string } => {
+	try {
+		const name = runGitCommand("git config user.name").trim();
+		const email = runGitCommand("git config user.email").trim();
+		return { name, email };
+	} catch {
+		return { name: "", email: "" };
+	}
 };
 
 export const getLastCommitInfo = (branchName: string) => {
@@ -57,15 +81,27 @@ export const getCommitsBehindMain = (
 	}
 };
 
-export const analyzeBranches = (staleDays = 30, mergedOnly = false) => {
-	const branches = getAllGitBranches();
+export const analyzeBranches = (
+	staleDays = 30,
+	mergedOnly = false,
+	myBranchesOnly = false,
+) => {
+	// Use optimized query to get branches with authors in one go
+	const branchesWithAuthors = getAllBranchesWithAuthors();
 	const currentBranch = runGitCommand("git branch --show-current").trim();
 	const mainBranch = "main";
 
+	// Get current user info for filtering if needed
+	const currentUser = myBranchesOnly
+		? getCurrentGitUser()
+		: { name: "", email: "" };
+
 	const branchInfo: BranchInfo[] = [];
 
-	for (const branch of branches) {
+	for (const branchData of branchesWithAuthors) {
 		try {
+			const { name: branch, authorName, authorEmail } = branchData;
+
 			const lastCommitInfo = getLastCommitInfo(branch);
 			const isStale =
 				lastCommitInfo.date.getTime() <
@@ -77,6 +113,14 @@ export const analyzeBranches = (staleDays = 30, mergedOnly = false) => {
 
 			// If mergedOnly is true, skip branches that aren't merged
 			if (mergedOnly && !isMerged) continue;
+
+			// If myBranchesOnly is true, skip branches not authored by current user
+			if (myBranchesOnly) {
+				const isMyBranch =
+					(currentUser.name && authorName === currentUser.name) ||
+					(currentUser.email && authorEmail === currentUser.email);
+				if (!isMyBranch) continue;
+			}
 
 			const commitsBehindMain = getCommitsBehindMain(branch, mainBranch);
 			const isCurrent = branch === currentBranch;
@@ -91,7 +135,7 @@ export const analyzeBranches = (staleDays = 30, mergedOnly = false) => {
 				isCurrent,
 			});
 		} catch (error) {
-			console.error(`Error analyzing branch ${branch}:`, error);
+			console.error(`Error analyzing branch ${branchData.name}:`, error);
 		}
 	}
 

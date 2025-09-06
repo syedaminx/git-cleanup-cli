@@ -45,10 +45,13 @@ program
 		"Only show branches that have been merged into main (true/false)",
 		"false",
 	)
+	.option("--my-branches", "Only show branches authored by you", false)
 	.action(async (options) => {
 		const staleDays = parseInt(options.staleDays, 10);
 		const mergedOnly = options.merged === "true" || options.merged === true;
-		await listBranches(staleDays, mergedOnly);
+		const myBranches = options.myBranches;
+
+		await listBranches(staleDays, mergedOnly, myBranches);
 	});
 
 program.parse(process.argv);

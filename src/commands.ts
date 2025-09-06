@@ -5,14 +5,24 @@ import { analyzeBranches, deleteBranch } from "./git-utils";
 import type { BranchInfo } from "./types";
 import { pluralize } from "./utils";
 
-export const listBranches = async (staleDays = 30, mergedOnly = false) => {
-	const filterDescription = mergedOnly 
-		? `\n🔍 Analyzing merged branches that have been stale for ${pluralize("day", staleDays)}...\n`
-		: `\n🔍 Analyzing branches that have been stale for ${pluralize("day", staleDays)}...\n`;
+export const listBranches = async (staleDays = 30, mergedOnly = false, myBranchesOnly = false) => {
+	let filterDescription = `\n🔍 Analyzing`;
+	
+	if (myBranchesOnly && mergedOnly) {
+		filterDescription += ` your merged branches`;
+	} else if (myBranchesOnly) {
+		filterDescription += ` your branches`;
+	} else if (mergedOnly) {
+		filterDescription += ` merged branches`;
+	} else {
+		filterDescription += ` branches`;
+	}
+	
+	filterDescription += ` that have been stale for ${pluralize("day", staleDays)}...\n`;
 	
 	console.log(chalk.blue(filterDescription));
 
-	const branches = analyzeBranches(staleDays, mergedOnly);
+	const branches = analyzeBranches(staleDays, mergedOnly, myBranchesOnly);
 
 	if (branches.length === 0) {
 		console.log(chalk.green("No stale branches found.\n"));

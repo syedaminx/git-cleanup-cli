@@ -46,10 +46,10 @@ git-cleanup list -s 60
 #### Filter by merge status
 ```bash
 # Show only merged branches that are stale
-git-cleanup list --merged
+git-cleanup list --only-merged
 
 # Explicitly show all branches (merged and unmerged)
-git-cleanup list --merged=false
+git-cleanup list --only-merged=false
 ```
 
 #### Filter by author
@@ -58,7 +58,7 @@ git-cleanup list --merged=false
 git-cleanup list --my-branches
 
 # Combine filters: show your merged branches that are stale
-git-cleanup list --my-branches --merged
+git-cleanup list --my-branches --only-merged
 ```
 
 ## Commands
@@ -72,7 +72,7 @@ List and optionally delete stale branches.
 | Option | Short | Description | Default |
 |--------|-------|-------------|---------|
 | `--stale-days <days>` | `-s` | Number of days to consider a branch stale | 30 |
-| `--merged [true/false]` | `-m` | Only show merged branches | false |
+| `--only-merged [true/false]` | `-m` | Only show merged branches | false |
 | `--my-branches` | | Only show branches authored by you | false |
 
 #### Global Options

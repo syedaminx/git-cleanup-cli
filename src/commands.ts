@@ -112,9 +112,7 @@ const interactiveBranchDeletion = async (branches: BranchInfo[]) => {
 				choices: deletableBranches.map((branch) => ({
 					name: `${
 						branch.name
-					} (${branch.lastCommitDate.toLocaleDateString()}, ${
-						branch.isMerged ? "merged" : "not merged"
-					}, ${branch.commitsBehindMain} commits behind)`,
+					} (${branch.isMerged ? "merged" : "not merged"})`,
 					value: branch.name,
 					checked: false,
 				})),

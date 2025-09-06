@@ -1,7 +1,7 @@
 export interface BranchInfo {
   name: string;
   lastCommitDate: Date;
-  lastCommitHash: string;
+  lastCommitHash: string | undefined;
   isMerged: boolean;
   commitsBehindMain: number;
   isStale: boolean; // Will calculate this later based on staleDays threshold

@@ -1,4 +1,5 @@
 import { execSync } from "child_process";
+import { BranchInfo } from "./types";
 
 export const runGitCommand = (command: string) => {
   try {
@@ -54,4 +55,38 @@ export const getCommitsBehindMain = (
   } catch {
     return 0;
   }
+};
+
+export const analyzeBranches = (staleDays: number = 30) => {
+  const branches = getAllGitBranches();
+  const currentBranch = runGitCommand("git branch --show-current").trim();
+  const mainBranch = "main";
+
+  const branchInfo: BranchInfo[] = [];
+
+  for (const branch of branches) {
+    try {
+      const lastCommitInfo = getLastCommitInfo(branch);
+      const isMerged = isBranchMerged(branch, mainBranch);
+      const commitsBehindMain = getCommitsBehindMain(branch, mainBranch);
+      const isStale =
+        lastCommitInfo.date.getTime() <
+        Date.now() - staleDays * 24 * 60 * 60 * 1000;
+      const isCurrent = branch === currentBranch;
+
+      branchInfo.push({
+        name: branch,
+        lastCommitDate: lastCommitInfo.date,
+        lastCommitHash: lastCommitInfo.hash,
+        isMerged,
+        commitsBehindMain,
+        isStale,
+        isCurrent,
+      });
+    } catch (error) {
+      console.error(`Error analyzing branch ${branch}:`, error);
+    }
+  }
+
+  return branchInfo;
 };

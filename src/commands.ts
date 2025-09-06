@@ -1,6 +1,12 @@
 import chalk from "chalk";
 import Table from "cli-table3";
 import inquirer from "inquirer";
+import {
+	DELETION_METHODS,
+	FILTER_DESCRIPTIONS,
+	MESSAGES,
+	PROMPTS,
+} from "./constants";
 import { analyzeBranches, deleteBranch } from "./git-utils";
 import type { BranchInfo } from "./types";
 import { pluralize } from "./utils";
@@ -10,14 +16,18 @@ export const listBranches = async (
 	mergedOnly = false,
 	myBranchesOnly = false,
 ) => {
-	const filterDescription = getFilterDescription(myBranchesOnly, mergedOnly, staleDays);
+	const filterDescription = getFilterDescription(
+		myBranchesOnly,
+		mergedOnly,
+		staleDays,
+	);
 
 	console.log(chalk.blue(filterDescription));
 
 	const branches = analyzeBranches(staleDays, mergedOnly, myBranchesOnly);
 
 	if (branches.length === 0) {
-		console.log(chalk.green("No stale branches found.\n"));
+		console.log(chalk.green(MESSAGES.NO_STALE_BRANCHES));
 		return;
 	}
 
@@ -41,7 +51,7 @@ export const listBranches = async (
 		{
 			type: "confirm",
 			name: "shouldDelete",
-			message: "Would you like to delete any of these stale branches?",
+			message: PROMPTS.DELETE_CONFIRMATION,
 			default: false,
 		},
 	]);
@@ -51,26 +61,23 @@ export const listBranches = async (
 	}
 };
 
-const getFilterDescription = (myBranchesOnly: boolean, mergedOnly: boolean, staleDays: number) => {
-  const filters = {
-    'all_branches': 'branches',
-    'merged_only': 'merged branches', 
-    'my_branches_only': 'your branches',
-    'my_merged_branches': 'your merged branches'
-  };
-  
-  let key: keyof typeof filters;
-  if (myBranchesOnly && mergedOnly) {
-    key = 'my_merged_branches';
-  } else if (myBranchesOnly) {
-    key = 'my_branches_only';
-  } else if (mergedOnly) {
-    key = 'merged_only';
-  } else {
-    key = 'all_branches';
-  }
-  
-  return `\n🔍 Analyzing ${filters[key]} that have been stale for ${pluralize("day", staleDays)}...\n`;
+const getFilterDescription = (
+	myBranchesOnly: boolean,
+	mergedOnly: boolean,
+	staleDays: number,
+) => {
+	let key: keyof typeof FILTER_DESCRIPTIONS;
+	if (myBranchesOnly && mergedOnly) {
+		key = "my_merged_branches";
+	} else if (myBranchesOnly) {
+		key = "my_branches_only";
+	} else if (mergedOnly) {
+		key = "merged_only";
+	} else {
+		key = "all_branches";
+	}
+
+	return `\n🔍 Analyzing ${FILTER_DESCRIPTIONS[key]} that have been stale for ${pluralize("day", staleDays)}...\n`;
 };
 
 const chooseDeletionMethod = async (branches: BranchInfo[]) => {
@@ -78,26 +85,26 @@ const chooseDeletionMethod = async (branches: BranchInfo[]) => {
 		{
 			type: "list",
 			name: "deletionMethod",
-			message: "How would you like to delete the stale branches?",
+			message: PROMPTS.DELETION_METHOD,
 			choices: [
+				DELETION_METHODS.INTERACTIVE,
 				{
-					name: "📋 Interactively choose specific branches to delete",
-					value: "interactive",
-				},
-				{
-					name: `🗑️  Delete all ${branches.length} stale branches`,
-					value: "all",
+					name: DELETION_METHODS.ALL.name.replace(
+						"{count}",
+						branches.length.toString(),
+					),
+					value: DELETION_METHODS.ALL.value,
 				},
 			],
-			default: "interactive",
+			default: DELETION_METHODS.INTERACTIVE.value,
 		},
 	]);
 
 	switch (deletionMethod) {
-		case "interactive":
+		case DELETION_METHODS.INTERACTIVE.value:
 			await interactiveBranchDeletion(branches);
 			break;
-		case "all":
+		case DELETION_METHODS.ALL.value:
 			await deleteAllBranches(branches);
 			break;
 	}
@@ -107,11 +114,7 @@ const interactiveBranchDeletion = async (branches: BranchInfo[]) => {
 	const deletableBranches = branches.filter((branch) => !branch.isCurrent);
 
 	if (deletableBranches.length === 0) {
-		console.log(
-			chalk.yellow(
-				"\n⚠️  No branches available for deletion (current branch cannot be deleted).\n",
-			),
-		);
+		console.log(chalk.yellow(MESSAGES.NO_DELETABLE_BRANCHES));
 		return;
 	}
 
@@ -119,7 +122,7 @@ const interactiveBranchDeletion = async (branches: BranchInfo[]) => {
 		{
 			type: "checkbox",
 			name: "branchesToDelete",
-			message: "Select branches to delete:",
+			message: PROMPTS.SELECT_BRANCHES,
 			choices: deletableBranches.map((branch) => ({
 				name: `${branch.name} (${branch.isMerged ? "merged" : "not merged"})`,
 				value: branch.name,
@@ -127,7 +130,7 @@ const interactiveBranchDeletion = async (branches: BranchInfo[]) => {
 			})),
 			validate: (answer) => {
 				if (answer.length === 0) {
-					return "You must choose at least one branch to delete.";
+					return PROMPTS.BRANCH_SELECTION_REQUIRED;
 				}
 				return true;
 			},
@@ -152,12 +155,14 @@ const confirmDeletion = async (branchCount: number) => {
 		{
 			type: "input",
 			name: "confirmation",
-			message: `This will delete ${pluralize("branch", branchCount)}. Type '${chalk.red("delete")}' to confirm:`,
+			message: `This will delete ${pluralize("branch", branchCount)}. Type '${chalk.red(PROMPTS.TYPE_DELETE_TO_CONFIRM)}' to confirm:`,
 			validate: (input) => {
-				if (input.toLowerCase() === "delete") {
+				if (
+					input.toLowerCase() === PROMPTS.TYPE_DELETE_TO_CONFIRM.toLowerCase()
+				) {
 					return true;
 				}
-				return "You must type 'delete' to confirm this action.";
+				return `You must type '${PROMPTS.TYPE_DELETE_TO_CONFIRM}' to confirm this action.`;
 			},
 		},
 	]);
@@ -170,11 +175,7 @@ const deleteAllBranches = async (branches: BranchInfo[]) => {
 	}, []);
 
 	if (deletableBranchNames.length === 0) {
-		console.log(
-			chalk.yellow(
-				"\n⚠️  No branches available for deletion (current branch cannot be deleted).\n",
-			),
-		);
+		console.log(chalk.yellow(MESSAGES.NO_DELETABLE_BRANCHES));
 		return;
 	}
 
@@ -201,5 +202,5 @@ const deleteBranches = async (branchNames: string[]) => {
 		}
 	}
 
-	console.log(chalk.green(`\n🎉 Branch deletion completed!\n`));
+	console.log(chalk.green(MESSAGES.BRANCH_DELETION_COMPLETED));
 };

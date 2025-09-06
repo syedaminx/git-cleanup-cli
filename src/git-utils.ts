@@ -27,3 +27,17 @@ export const getLastCommitInfo = (branchName: string) => {
     date: new Date(dateStr?.trim() || ""),
   };
 };
+
+export const isBranchMerged = (
+  branchName: string,
+  mainBranch: string = "main"
+) => {
+  try {
+    // This command returns exit code 0 if branchName is an ancestor of mainBranch (i.e., merged)
+    runGitCommand(`git merge-base --is-ancestor ${branchName} ${mainBranch}`);
+    return true;
+  } catch {
+    // Exit code 1 means not merged, any other error also means not merged
+    return false;
+  }
+};

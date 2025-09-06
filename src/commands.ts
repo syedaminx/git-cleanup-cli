@@ -12,7 +12,7 @@ export const listBranches = (staleDays: number = 30) => {
   const branches = analyzeBranches(staleDays);
 
   if (branches.length === 0) {
-    console.log(chalk.blue("\nNo stale branches found.\n"));
+    console.log(chalk.green("No stale branches found.\n"));
     return;
   }
 

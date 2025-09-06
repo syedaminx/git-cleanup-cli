@@ -80,7 +80,7 @@ const getCommitsBehindMain = (
 
 export const analyzeBranches = (
 	staleDays = 30,
-	mergedOnly = false,
+	onlyMerged = false,
 	myBranchesOnly = false,
 ) => {
 	// Use optimized query to get branches with authors in one go
@@ -108,8 +108,8 @@ export const analyzeBranches = (
 
 			const isMerged = isBranchMerged(branch, mainBranch);
 
-			// If mergedOnly is true, skip branches that aren't merged
-			if (mergedOnly && !isMerged) continue;
+			// If onlyMerged is true, skip branches that aren't merged
+			if (onlyMerged && !isMerged) continue;
 
 			// If myBranchesOnly is true, skip branches not authored by current user
 			if (myBranchesOnly) {

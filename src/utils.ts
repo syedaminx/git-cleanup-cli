@@ -45,20 +45,20 @@ export const pluralize = (
 /**
  * Generates a filter description message for branch analysis
  * @param myBranchesOnly - Whether to filter to only current user's branches
- * @param mergedOnly - Whether to filter to only merged branches
+ * @param onlyMerged - Whether to filter to only merged branches
  * @param staleDays - Number of days to consider a branch stale
  */
 export const getFilterDescription = (
 	myBranchesOnly: boolean,
-	mergedOnly: boolean,
+	onlyMerged: boolean,
 	staleDays: number,
 ): string => {
 	let key: keyof typeof FILTER_DESCRIPTIONS;
-	if (myBranchesOnly && mergedOnly) {
+	if (myBranchesOnly && onlyMerged) {
 		key = "my_merged_branches";
 	} else if (myBranchesOnly) {
 		key = "my_branches_only";
-	} else if (mergedOnly) {
+	} else if (onlyMerged) {
 		key = "merged_only";
 	} else {
 		key = "all_branches";

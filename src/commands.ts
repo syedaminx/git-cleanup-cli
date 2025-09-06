@@ -8,18 +8,18 @@ import { getFilterDescription } from "./utils";
 
 export const listBranches = async (
 	staleDays = 30,
-	mergedOnly = false,
+	onlyMerged = false,
 	myBranchesOnly = false,
 ) => {
 	const filterDescription = getFilterDescription(
 		myBranchesOnly,
-		mergedOnly,
+		onlyMerged,
 		staleDays,
 	);
 
 	console.log(chalk.blue(filterDescription));
 
-	const branches = analyzeBranches(staleDays, mergedOnly, myBranchesOnly);
+	const branches = analyzeBranches(staleDays, onlyMerged, myBranchesOnly);
 
 	if (branches.length === 0) {
 		console.log(chalk.green(MESSAGES.NO_STALE_BRANCHES));

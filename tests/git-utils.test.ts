@@ -127,19 +127,19 @@ describe("analyzeBranches", () => {
 		expect(branchNames).toContain("old/legacy-code");
 	});
 
-	it("should filter to only merged branches when mergedOnly is true", () => {
-		const mergedOnlyBranches = analyzeBranches(365, true);
-		expect(mergedOnlyBranches.length).toBe(0);
+	it("should filter to only merged branches when onlyMerged is true", () => {
+		const onlyMergedBranches = analyzeBranches(365, true);
+		expect(onlyMergedBranches.length).toBe(0);
 
 		// merge into main
 		runGitCommand("git merge old/legacy-code");
 
-		const mergedOnlyBranches2 = analyzeBranches(365, true);
-		expect(mergedOnlyBranches2.length).toBe(1);
-		expect(mergedOnlyBranches2[0]?.name).toBe("old/legacy-code");
+		const onlyMergedBranches2 = analyzeBranches(365, true);
+		expect(onlyMergedBranches2.length).toBe(1);
+		expect(onlyMergedBranches2[0]?.name).toBe("old/legacy-code");
 	});
 
-	it("should return same results when mergedOnly is false vs default", () => {
+	it("should return same results when onlyMerged is false vs default", () => {
 		const defaultResult = analyzeBranches(365);
 		const explicitFalseResult = analyzeBranches(365, false);
 

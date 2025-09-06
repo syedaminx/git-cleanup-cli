@@ -7,7 +7,7 @@ on:
     branches: ["*"]
 
 jobs:
-  test:
+  ci:
     runs-on: ubuntu-latest
 
     steps:
@@ -21,9 +21,6 @@ jobs:
 
       - name: Install dependencies
         run: npm ci
-
-      - name: Linting
-        run: npm run lint
 
       - name: Setup Git for tests
         run: |

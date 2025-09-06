@@ -101,4 +101,47 @@ describe("CLI Integration Tests", () => {
 		expect(result.exitCode).not.toBe(0);
 		expect(result.stderr.length).toBeGreaterThan(0);
 	});
+
+	it("should filter to only merged branches with --merged", () => {
+		const allBranchesResult = runCLI("list --stale-days 365");
+		const mergedOnlyResult = runCLI("list --stale-days 365 --merged");
+
+		expect(allBranchesResult.exitCode).toBe(0);
+		expect(mergedOnlyResult.exitCode).toBe(0);
+
+		// Should show "merged branches" in the analysis message
+		expect(mergedOnlyResult.stdout).toContain("Analyzing merged branches");
+
+		// Parse both outputs to compare
+		const allBranches = parseCLIOutput(allBranchesResult.stdout);
+		const mergedBranches = parseCLIOutput(mergedOnlyResult.stdout);
+
+		// All branches in merged result should be marked as merged
+		for (const branch of mergedBranches.branches) {
+			expect(branch.merged).toBe("Yes");
+		}
+
+		// Should have fewer or equal branches when filtering to merged only
+		expect(mergedBranches.branches.length).toBeLessThanOrEqual(allBranches.branches.length);
+	});
+
+	it("should support --merged=true and --merged=false explicitly", () => {
+		const mergedTrueResult = runCLI("list --stale-days 365 --merged=true");
+		const mergedFalseResult = runCLI("list --stale-days 365 --merged=false");
+		const noFlagResult = runCLI("list --stale-days 365");
+
+		expect(mergedTrueResult.exitCode).toBe(0);
+		expect(mergedFalseResult.exitCode).toBe(0);
+		expect(noFlagResult.exitCode).toBe(0);
+
+		// --merged=true should show "merged branches" message
+		expect(mergedTrueResult.stdout).toContain("Analyzing merged branches");
+
+		// --merged=false should show regular message (same as no flag)
+		expect(mergedFalseResult.stdout).not.toContain("Analyzing merged branches");
+		expect(noFlagResult.stdout).not.toContain("Analyzing merged branches");
+
+		// --merged=false should give same results as no flag
+		expect(mergedFalseResult.stdout).toBe(noFlagResult.stdout);
+	});
 });

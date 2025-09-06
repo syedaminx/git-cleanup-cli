@@ -17,7 +17,7 @@ echo "Creating test repository: $REPO_NAME"
 mkdir -p "$REPO_PATH"
 cd "$REPO_PATH"
 
-git init
+git init --initial-branch=main
 git config user.name "Test User"
 git config user.email "test@example.com"
 

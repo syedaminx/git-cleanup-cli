@@ -31,7 +31,10 @@ jobs:
           git config --global user.email "test@example.com"
 
       - name: Generate test repository
-        run: ./tests/scripts/generate-test-repo.sh
+        run: |
+          # Clean any existing test repos and create fresh one
+          rm -rf tests/repos/
+          ./tests/scripts/generate-test-repo.sh
 
       - name: Run tests
         run: npm test

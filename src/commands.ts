@@ -1,15 +1,10 @@
 import chalk from "chalk";
 import Table from "cli-table3";
 import inquirer from "inquirer";
-import {
-	DELETION_METHODS,
-	FILTER_DESCRIPTIONS,
-	MESSAGES,
-	PROMPTS,
-} from "./constants";
+import { DELETION_METHODS, MESSAGES, PROMPTS } from "./constants";
 import { analyzeBranches, deleteBranch } from "./git-utils";
 import type { BranchInfo } from "./types";
-import { pluralize } from "./utils";
+import { getFilterDescription, pluralize } from "./utils";
 
 export const listBranches = async (
 	staleDays = 30,
@@ -59,25 +54,6 @@ export const listBranches = async (
 	if (shouldDelete) {
 		await chooseDeletionMethod(branches);
 	}
-};
-
-const getFilterDescription = (
-	myBranchesOnly: boolean,
-	mergedOnly: boolean,
-	staleDays: number,
-) => {
-	let key: keyof typeof FILTER_DESCRIPTIONS;
-	if (myBranchesOnly && mergedOnly) {
-		key = "my_merged_branches";
-	} else if (myBranchesOnly) {
-		key = "my_branches_only";
-	} else if (mergedOnly) {
-		key = "merged_only";
-	} else {
-		key = "all_branches";
-	}
-
-	return `\n🔍 Analyzing ${FILTER_DESCRIPTIONS[key]} that have been stale for ${pluralize("day", staleDays)}...\n`;
 };
 
 const chooseDeletionMethod = async (branches: BranchInfo[]) => {

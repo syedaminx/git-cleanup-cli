@@ -1,3 +1,5 @@
+import { FILTER_DESCRIPTIONS } from "./constants";
+
 /**
  * Pluralizes a word based on the count
  * @param word - The singular form of the word
@@ -38,4 +40,29 @@ export const pluralize = (
 	}
 
 	return `${count} ${plural}`;
+};
+
+/**
+ * Generates a filter description message for branch analysis
+ * @param myBranchesOnly - Whether to filter to only current user's branches
+ * @param mergedOnly - Whether to filter to only merged branches
+ * @param staleDays - Number of days to consider a branch stale
+ */
+export const getFilterDescription = (
+	myBranchesOnly: boolean,
+	mergedOnly: boolean,
+	staleDays: number,
+): string => {
+	let key: keyof typeof FILTER_DESCRIPTIONS;
+	if (myBranchesOnly && mergedOnly) {
+		key = "my_merged_branches";
+	} else if (myBranchesOnly) {
+		key = "my_branches_only";
+	} else if (mergedOnly) {
+		key = "merged_only";
+	} else {
+		key = "all_branches";
+	}
+
+	return `\n🔍 Analyzing ${FILTER_DESCRIPTIONS[key]} that have been stale for ${pluralize("day", staleDays)}...\n`;
 };

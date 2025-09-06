@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { pluralize } from "../src/utils";
+import { getFilterDescription, pluralize } from "../src/utils";
 
 describe("pluralize", () => {
 	it("should return singular form for count of 1", () => {
@@ -36,5 +36,42 @@ describe("pluralize", () => {
 	it("should handle decimal numbers (treat as plural)", () => {
 		expect(pluralize("branch", 1.5)).toBe("1.5 branches");
 		expect(pluralize("item", 0.5)).toBe("0.5 items");
+	});
+});
+
+describe("getFilterDescription", () => {
+	it("should return description for all branches", () => {
+		const result = getFilterDescription(false, false, 30);
+		expect(result).toBe(
+			"\n🔍 Analyzing branches that have been stale for 30 days...\n",
+		);
+	});
+
+	it("should return description for merged branches only", () => {
+		const result = getFilterDescription(false, true, 15);
+		expect(result).toBe(
+			"\n🔍 Analyzing merged branches that have been stale for 15 days...\n",
+		);
+	});
+
+	it("should return description for my branches only", () => {
+		const result = getFilterDescription(true, false, 7);
+		expect(result).toBe(
+			"\n🔍 Analyzing your branches that have been stale for 7 days...\n",
+		);
+	});
+
+	it("should return description for my merged branches", () => {
+		const result = getFilterDescription(true, true, 60);
+		expect(result).toBe(
+			"\n🔍 Analyzing your merged branches that have been stale for 60 days...\n",
+		);
+	});
+
+	it("should use pluralize for single day", () => {
+		const result = getFilterDescription(false, false, 1);
+		expect(result).toBe(
+			"\n🔍 Analyzing branches that have been stale for 1 day...\n",
+		);
 	});
 });

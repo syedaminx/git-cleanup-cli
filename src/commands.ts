@@ -5,14 +5,14 @@ import { analyzeBranches, deleteBranch } from "./git-utils";
 import type { BranchInfo } from "./types";
 import { pluralize } from "./utils";
 
-export const listBranches = async (staleDays = 30) => {
-	console.log(
-		chalk.blue(
-			`\n🔍 Analyzing branches that have been stale for ${pluralize("day", staleDays)}...\n`,
-		),
-	);
+export const listBranches = async (staleDays = 30, mergedOnly = false) => {
+	const filterDescription = mergedOnly 
+		? `\n🔍 Analyzing merged branches that have been stale for ${pluralize("day", staleDays)}...\n`
+		: `\n🔍 Analyzing branches that have been stale for ${pluralize("day", staleDays)}...\n`;
+	
+	console.log(chalk.blue(filterDescription));
 
-	const branches = analyzeBranches(staleDays);
+	const branches = analyzeBranches(staleDays, mergedOnly);
 
 	if (branches.length === 0) {
 		console.log(chalk.green("No stale branches found.\n"));

@@ -40,9 +40,15 @@ program
 		"Number of days to consider a branch stale",
 		"30",
 	)
+	.option(
+		"-m, --merged [value]",
+		"Only show branches that have been merged into main (true/false)",
+		"false",
+	)
 	.action(async (options) => {
 		const staleDays = parseInt(options.staleDays, 10);
-		await listBranches(staleDays);
+		const mergedOnly = options.merged === "true" || options.merged === true;
+		await listBranches(staleDays, mergedOnly);
 	});
 
 program.parse(process.argv);

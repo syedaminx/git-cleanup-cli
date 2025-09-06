@@ -3,11 +3,12 @@ import Table from "cli-table3";
 import inquirer from "inquirer";
 import { analyzeBranches, deleteBranch } from "./git-utils";
 import type { BranchInfo } from "./types";
+import { pluralize } from "./utils";
 
 export const listBranches = async (staleDays = 30) => {
 	console.log(
 		chalk.blue(
-			`\n🔍 Analyzing branches that have been stale for ${staleDays} days...\n`,
+			`\n🔍 Analyzing branches that have been stale for ${pluralize('day', staleDays)}...\n`,
 		),
 	);
 
@@ -116,7 +117,7 @@ const interactiveBranchDeletion = async (branches: BranchInfo[]) => {
 
 		console.log(
 			chalk.yellow(
-				`\n🗑️  Deleting ${branchesToDelete.length} branch(es)...\n`,
+				`\n🗑️  Deleting ${pluralize('branch', branchesToDelete.length)}...\n`,
 			),
 		);
 
@@ -129,7 +130,7 @@ const confirmDeletion = async (branchCount: number) => {
     {
       type: "input",
       name: "confirmation",
-      message: `This will delete ${branchCount} branch${branchCount === 1 ? '' : 'es'}. Type '${chalk.red("delete")}' to confirm:`,
+      message: `This will delete ${pluralize('branch', branchCount)}. Type '${chalk.red("delete")}' to confirm:`,
       validate: (input) => {
         if (input.toLowerCase() === "delete") {
           return true;
@@ -153,7 +154,7 @@ const deleteAllBranches = async (branches: BranchInfo[]) => {
 
   await confirmDeletion(deletableBranchNames.length);
 
-  console.log(chalk.yellow(`\n🗑️  Deleting ${deletableBranchNames.length} branch(es)...\n`));
+  console.log(chalk.yellow(`\n🗑️  Deleting ${pluralize('branch', deletableBranchNames.length)}...\n`));
   
   await deleteBranches(deletableBranchNames);
 }

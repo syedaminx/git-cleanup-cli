@@ -42,7 +42,7 @@
     "skipLibCheck": true,
 
     "outDir": "./dist",
-    "rootDir": "./src",
+    // "rootDir": "./src",
     "esModuleInterop": true
   }
 }

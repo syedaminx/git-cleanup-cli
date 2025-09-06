@@ -1,34 +1,9 @@
-import { describe, it, expect, beforeEach, afterEach } from "vitest";
-import { execSync } from "child_process";
-import path from "path";
+import { describe, it, expect } from "vitest";
+import { useTestRepo } from "./utils/test-helpers";
 import { runGitCommand } from "../src/git-utils";
 
 describe("runGitCommand", () => {
-  const testRepoPath = path.resolve("./tests/repos/test-repo-1");
-  const originalCwd = process.cwd();
-
-  beforeEach(() => {
-    process.chdir(testRepoPath);
-    // Save current state
-    try {
-      execSync("git add -A", { stdio: "ignore" });
-      execSync('git stash push -u -m "test-backup"', { stdio: "ignore" });
-    } catch {
-      // No changes to stash, that's fine
-    }
-  });
-
-  afterEach(() => {
-    // Restore state
-    execSync("git reset --hard HEAD", { stdio: "ignore" });
-    execSync("git clean -fd", { stdio: "ignore" });
-    try {
-      execSync("git stash pop", { stdio: "ignore" });
-    } catch {
-      // No stash to pop, that's fine
-    }
-    process.chdir(originalCwd);
-  });
+  useTestRepo();
 
   it("should return branch list", () => {
     const result = runGitCommand("git branch");

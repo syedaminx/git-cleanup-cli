@@ -7,7 +7,9 @@
     "start": "ts-node src/index.ts",
     "dev": "ts-node src/index.ts",
     "test": "vitest",
-    "test:run": "vitest run"
+    "test:run": "vitest run",
+    "lint": "biome check .",
+    "lint:fix": "biome check --write ."
   },
   "bin": {
     "git-cleanup": "./dist/index.js"

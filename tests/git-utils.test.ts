@@ -1,3 +1,4 @@
+import { execSync } from "node:child_process";
 import { describe, expect, it } from "vitest";
 import {
 	analyzeBranches,
@@ -239,6 +240,51 @@ describe("analyzeBranches", () => {
 		const explicitFalseResult = analyzeBranches(365, false);
 
 		expect(defaultResult).toEqual(explicitFalseResult);
+	});
+
+	it("should filter to only current user branches when myBranchesOnly is true", () => {
+		const currentUserName = runGitCommand("git config user.name").trim();
+		const currentUserEmail = runGitCommand("git config user.email").trim();
+
+		// Create a test branch with a different author
+		const testBranchFromOtherAuthor = "test/different-author-branch";
+		runGitCommand(`git checkout -b ${testBranchFromOtherAuthor}`);
+
+		// Set different author temporarily for this commit
+		runGitCommand("git config user.name 'Different Author'");
+		runGitCommand("git config user.email 'different@example.com'");
+
+		// Create a commit with the different author, backdated to make it stale
+		const pastDate = new Date();
+		pastDate.setDate(pastDate.getDate() - 400); // 400 days ago
+		const dateStr = pastDate.toISOString();
+
+		// Use execSync directly with environment variables for backdating
+		execSync(`git commit --allow-empty -m 'Commit by different author'`, {
+			encoding: "utf-8",
+			env: {
+				...process.env,
+				GIT_AUTHOR_DATE: dateStr,
+				GIT_COMMITTER_DATE: dateStr,
+			},
+		});
+
+		// Restore original user config
+		runGitCommand(`git config user.name '${currentUserName}'`);
+		runGitCommand(`git config user.email '${currentUserEmail}'`);
+
+		runGitCommand("git checkout main");
+
+		const allBranches = analyzeBranches(365, false, false);
+		const myBranchesOnly = analyzeBranches(365, false, true);
+
+		const allBranchNames = allBranches.map((b) => b.name);
+		const myBranchNames = myBranchesOnly.map((b) => b.name);
+
+		expect(allBranchNames).toContain(testBranchFromOtherAuthor);
+		expect(myBranchNames).not.toContain(testBranchFromOtherAuthor);
+
+		expect(myBranchesOnly.length).toBeLessThanOrEqual(allBranches.length);
 	});
 });
 

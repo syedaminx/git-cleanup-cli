@@ -104,17 +104,17 @@ describe("CLI Integration Tests", () => {
 
 	it("should filter to only merged branches with --merged", () => {
 		const allBranchesResult = runCLI("list --stale-days 365");
-		const mergedOnlyResult = runCLI("list --stale-days 365 --merged");
+		const onlyMergedResult = runCLI("list --stale-days 365 --merged");
 
 		expect(allBranchesResult.exitCode).toBe(0);
-		expect(mergedOnlyResult.exitCode).toBe(0);
+		expect(onlyMergedResult.exitCode).toBe(0);
 
 		// Should show "merged branches" in the analysis message
-		expect(mergedOnlyResult.stdout).toContain("Analyzing merged branches");
+		expect(onlyMergedResult.stdout).toContain("Analyzing merged branches");
 
 		// Parse both outputs to compare
 		const allBranches = parseCLIOutput(allBranchesResult.stdout);
-		const mergedBranches = parseCLIOutput(mergedOnlyResult.stdout);
+		const mergedBranches = parseCLIOutput(onlyMergedResult.stdout);
 
 		// All branches in merged result should be marked as merged
 		for (const branch of mergedBranches.branches) {

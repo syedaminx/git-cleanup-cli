@@ -41,17 +41,17 @@ program
 		"30",
 	)
 	.option(
-		"-m, --merged [value]",
+		"-m, --only-merged [value]",
 		"Only show branches that have been merged into main (true/false)",
 		"false",
 	)
 	.option("--my-branches", "Only show branches authored by you", false)
 	.action(async (options) => {
 		const staleDays = parseInt(options.staleDays, 10);
-		const mergedOnly = options.merged === "true" || options.merged === true;
+		const onlyMerged = options.merged === "true" || options.merged === true;
 		const myBranches = options.myBranches;
 
-		await listBranches(staleDays, mergedOnly, myBranches);
+		await listBranches(staleDays, onlyMerged, myBranches);
 	});
 
 program.parse(process.argv);

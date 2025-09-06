@@ -8,7 +8,7 @@ import { pluralize } from "./utils";
 export const listBranches = async (staleDays = 30) => {
 	console.log(
 		chalk.blue(
-			`\n🔍 Analyzing branches that have been stale for ${pluralize('day', staleDays)}...\n`,
+			`\n🔍 Analyzing branches that have been stale for ${pluralize("day", staleDays)}...\n`,
 		),
 	);
 
@@ -97,9 +97,7 @@ const interactiveBranchDeletion = async (branches: BranchInfo[]) => {
 			name: "branchesToDelete",
 			message: "Select branches to delete:",
 			choices: deletableBranches.map((branch) => ({
-				name: `${
-					branch.name
-				} (${branch.isMerged ? "merged" : "not merged"})`,
+				name: `${branch.name} (${branch.isMerged ? "merged" : "not merged"})`,
 				value: branch.name,
 				checked: false,
 			})),
@@ -117,59 +115,67 @@ const interactiveBranchDeletion = async (branches: BranchInfo[]) => {
 
 		console.log(
 			chalk.yellow(
-				`\n🗑️  Deleting ${pluralize('branch', branchesToDelete.length)}...\n`,
+				`\n🗑️  Deleting ${pluralize("branch", branchesToDelete.length)}...\n`,
 			),
 		);
 
-    await deleteBranches(branchesToDelete);
-  }
+		await deleteBranches(branchesToDelete);
+	}
 };
 
 const confirmDeletion = async (branchCount: number) => {
-  await inquirer.prompt([
-    {
-      type: "input",
-      name: "confirmation",
-      message: `This will delete ${pluralize('branch', branchCount)}. Type '${chalk.red("delete")}' to confirm:`,
-      validate: (input) => {
-        if (input.toLowerCase() === "delete") {
-          return true;
-        }
-        return "You must type 'delete' to confirm this action.";
-      },
-    },
-  ]);
+	await inquirer.prompt([
+		{
+			type: "input",
+			name: "confirmation",
+			message: `This will delete ${pluralize("branch", branchCount)}. Type '${chalk.red("delete")}' to confirm:`,
+			validate: (input) => {
+				if (input.toLowerCase() === "delete") {
+					return true;
+				}
+				return "You must type 'delete' to confirm this action.";
+			},
+		},
+	]);
 };
 
 const deleteAllBranches = async (branches: BranchInfo[]) => {
-  const deletableBranchNames = branches.reduce<string[]>((acc, branch) => {
-    if (!branch.isCurrent) acc.push(branch.name);
-    return acc;
-  }, []);
-  
-  if (deletableBranchNames.length === 0) {
-    console.log(chalk.yellow("\n⚠️  No branches available for deletion (current branch cannot be deleted).\n"));
-    return;
-  }
+	const deletableBranchNames = branches.reduce<string[]>((acc, branch) => {
+		if (!branch.isCurrent) acc.push(branch.name);
+		return acc;
+	}, []);
 
-  await confirmDeletion(deletableBranchNames.length);
+	if (deletableBranchNames.length === 0) {
+		console.log(
+			chalk.yellow(
+				"\n⚠️  No branches available for deletion (current branch cannot be deleted).\n",
+			),
+		);
+		return;
+	}
 
-  console.log(chalk.yellow(`\n🗑️  Deleting ${pluralize('branch', deletableBranchNames.length)}...\n`));
-  
-  await deleteBranches(deletableBranchNames);
-}
+	await confirmDeletion(deletableBranchNames.length);
+
+	console.log(
+		chalk.yellow(
+			`\n🗑️  Deleting ${pluralize("branch", deletableBranchNames.length)}...\n`,
+		),
+	);
+
+	await deleteBranches(deletableBranchNames);
+};
 
 const deleteBranches = async (branchNames: string[]) => {
-  for (const branchName of branchNames) {
-    try {
-      deleteBranch(branchName);
-      console.log(chalk.green(`✅ Deleted branch: ${branchName}`));
-    } catch (error) {
-      console.log(
-        chalk.red(`❌ Failed to delete branch: ${branchName} - ${error}`),
-      );
-    }
-  }
+	for (const branchName of branchNames) {
+		try {
+			deleteBranch(branchName);
+			console.log(chalk.green(`✅ Deleted branch: ${branchName}`));
+		} catch (error) {
+			console.log(
+				chalk.red(`❌ Failed to delete branch: ${branchName} - ${error}`),
+			);
+		}
+	}
 
-  console.log(chalk.green(`\n🎉 Branch deletion completed!\n`));
-}
+	console.log(chalk.green(`\n🎉 Branch deletion completed!\n`));
+};

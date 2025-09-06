@@ -122,7 +122,9 @@ describe("CLI Integration Tests", () => {
 		}
 
 		// Should have fewer or equal branches when filtering to merged only
-		expect(mergedBranches.branches.length).toBeLessThanOrEqual(allBranches.branches.length);
+		expect(mergedBranches.branches.length).toBeLessThanOrEqual(
+			allBranches.branches.length,
+		);
 	});
 
 	it("should support --merged=true and --merged=false explicitly", () => {

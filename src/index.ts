@@ -48,7 +48,8 @@ program
 	.option("--my-branches", "Only show branches authored by you", false)
 	.action(async (options) => {
 		const staleDays = parseInt(options.staleDays, 10);
-		const onlyMerged = options.merged === "true" || options.merged === true;
+		const onlyMerged =
+			options.onlyMerged === "true" || options.onlyMerged === true;
 		const myBranches = options.myBranches;
 
 		await listBranches(staleDays, onlyMerged, myBranches);

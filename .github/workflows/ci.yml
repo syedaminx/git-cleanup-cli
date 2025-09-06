@@ -25,6 +25,9 @@ jobs:
       - name: Linting
         run: npm run lint
 
+      - name: Run build
+        run: npm run build
+
       - name: Setup Git for tests
         run: |
           git config --global user.name "Test User"
@@ -38,6 +41,3 @@ jobs:
 
       - name: Run tests
         run: npm test
-
-      - name: Run build
-        run: npm run build

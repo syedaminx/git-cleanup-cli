@@ -52,3 +52,4 @@ coverage/
 
 # Testing
 .jest/
+tests/repos/

@@ -1,30 +1,36 @@
-import { execSync } from "node:child_process";
+import { randomUUID } from "node:crypto";
+import fs from "node:fs";
 import path from "node:path";
 import { afterEach, beforeEach } from "vitest";
 
 export const useTestRepo = (repoName: string = "test-repo-1") => {
-	const testRepoPath = path.resolve(`./tests/repos/${repoName}`);
+	const sourceRepoPath = path.resolve(`./tests/repos/${repoName}`);
+	const tempDir = path.resolve("./tests/repos/tmp");
+	const uuid = randomUUID();
+	const testRepoPath = path.resolve(tempDir, uuid);
 	const originalCwd = process.cwd();
 
 	beforeEach(() => {
-		process.chdir(testRepoPath);
-		try {
-			execSync("git add -A", { stdio: "ignore" });
-			execSync('git stash push -u -m "test-backup"', { stdio: "ignore" });
-		} catch {
-			// No changes to stash, that's fine
+		// Ensure temp directory exists
+		if (!fs.existsSync(tempDir)) {
+			fs.mkdirSync(tempDir, { recursive: true });
 		}
+
+		// Simply copy the entire source repo directory to get everything including all branches
+		fs.cpSync(sourceRepoPath, testRepoPath, { recursive: true });
+
+		// Change to the isolated test repo directory
+		process.chdir(testRepoPath);
 	});
 
 	afterEach(() => {
-		execSync("git reset --hard HEAD", { stdio: "ignore" });
-		execSync("git clean -fd", { stdio: "ignore" });
-		try {
-			execSync("git stash pop", { stdio: "ignore" });
-		} catch {
-			// No stash to pop, that's fine
-		}
+		// Return to original directory first
 		process.chdir(originalCwd);
+
+		// Clean up the isolated test repo
+		if (fs.existsSync(testRepoPath)) {
+			fs.rmSync(testRepoPath, { recursive: true, force: true });
+		}
 	});
 
 	return testRepoPath;

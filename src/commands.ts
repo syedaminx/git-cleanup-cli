@@ -80,8 +80,7 @@ const chooseDeletionMethod = async (branches: BranchInfo[]) => {
 				await interactiveBranchDeletion(branches);
 				break;
 			case "all":
-				console.log(chalk.yellow("\n🚧 Delete all branches coming soon!\n"));
-				// TODO: Implement delete all with confirmation
+				await deleteAllBranches(branches);
 				break;
 		}
 	} catch (_error) {
@@ -104,7 +103,7 @@ const interactiveBranchDeletion = async (branches: BranchInfo[]) => {
 	}
 
 	try {
-		const { branchesToDelete } = await inquirer.prompt([
+		const { branchesToDelete }: { branchesToDelete: string[] } = await inquirer.prompt([
 			{
 				type: "checkbox",
 				name: "branchesToDelete",
@@ -132,22 +131,63 @@ const interactiveBranchDeletion = async (branches: BranchInfo[]) => {
 				),
 			);
 
-			for (const branchName of branchesToDelete) {
-				try {
-					deleteBranch(branchName);
-					console.log(chalk.green(`✅ Deleted branch: ${branchName}`));
-				} catch (error) {
-					console.log(
-						chalk.red(`❌ Failed to delete branch: ${branchName} - ${error}`),
-					);
-				}
-			}
-
-			console.log(chalk.green(`\n🎉 Branch deletion completed!\n`));
-		}
+        await deleteBranches(branchesToDelete);
+      }
 	} catch (_error) {
 		// Handle Ctrl+C or Ctrl+D
 		console.log(chalk.gray("Exiting...\n"));
 		process.exit(0);
 	}
 };
+
+const deleteAllBranches = async (branches: BranchInfo[]) => {
+  try {
+    await inquirer.prompt([
+      {
+        type: "input",
+        name: "confirmation",
+        message: `This will delete ALL stale branches. Type '${chalk.red("delete")}' to confirm:`,
+        validate: (input) => {
+          if (input.toLowerCase() === "delete") {
+            return true;
+          }
+          return "You must type 'delete' to confirm this action.";
+        },
+      },
+    ]);
+
+    // If we reach here, user typed "delete" correctly
+    const deletableBranchNames = branches.reduce<string[]>((acc, branch) => {
+      if (!branch.isCurrent) acc.push(branch.name);
+      return acc;
+    }, []);
+    
+    if (deletableBranchNames.length === 0) {
+      console.log(chalk.yellow("\n⚠️  No branches available for deletion (current branch cannot be deleted).\n"));
+      return;
+    }
+
+    console.log(chalk.yellow(`\n🗑️  Deleting ${deletableBranchNames.length} branch(es)...\n`));
+    
+    await deleteBranches(deletableBranchNames);
+  } catch (_error) {
+    // Handle Ctrl+C or Ctrl+D
+    console.log(chalk.gray("Exiting...\n"));
+    process.exit(0);
+  }
+}
+
+const deleteBranches = async (branchNames: string[]) => {
+  for (const branchName of branchNames) {
+    try {
+      deleteBranch(branchName);
+      console.log(chalk.green(`✅ Deleted branch: ${branchName}`));
+    } catch (error) {
+      console.log(
+        chalk.red(`❌ Failed to delete branch: ${branchName} - ${error}`),
+      );
+    }
+  }
+
+  console.log(chalk.green(`\n🎉 Branch deletion completed!\n`));
+}

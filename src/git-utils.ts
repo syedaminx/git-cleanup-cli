@@ -1,6 +1,6 @@
 import { execSync } from "child_process";
 
-const runGitCommand = (command: string) => {
+export const runGitCommand = (command: string) => {
   try {
     const result = execSync(command, { encoding: "utf-8" });
     return result.trim();

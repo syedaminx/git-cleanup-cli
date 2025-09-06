@@ -67,11 +67,14 @@ export const analyzeBranches = (staleDays: number = 30) => {
   for (const branch of branches) {
     try {
       const lastCommitInfo = getLastCommitInfo(branch);
-      const isMerged = isBranchMerged(branch, mainBranch);
-      const commitsBehindMain = getCommitsBehindMain(branch, mainBranch);
       const isStale =
         lastCommitInfo.date.getTime() <
         Date.now() - staleDays * 24 * 60 * 60 * 1000;
+
+      if (!isStale) continue;
+
+      const isMerged = isBranchMerged(branch, mainBranch);
+      const commitsBehindMain = getCommitsBehindMain(branch, mainBranch);
       const isCurrent = branch === currentBranch;
 
       branchInfo.push({

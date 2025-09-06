@@ -169,8 +169,15 @@ describe("analyzeBranches", () => {
     const result = analyzeBranches();
     const currentBranches = result.filter((branch) => branch.isCurrent);
 
-    expect(currentBranches).toHaveLength(1);
-    expect(currentBranches[0]?.name).toBeTruthy();
+    expect(currentBranches).toHaveLength(0);
+
+    // switch to the old/legacy-code branch
+    runGitCommand("git checkout old/legacy-code");
+
+    const result2 = analyzeBranches();
+    const currentBranches2 = result2.filter((branch) => branch.isCurrent);
+    expect(currentBranches2).toHaveLength(1);
+    expect(currentBranches2[0]?.name).toBe("old/legacy-code");
   });
 
   it("should identify stale branches with custom staleDays", () => {
@@ -207,14 +214,10 @@ describe("analyzeBranches", () => {
     });
   });
 
-  it("should include expected branches from test repo", () => {
+  it("should include stale branches from test repo", () => {
     const result = analyzeBranches();
     const branchNames = result.map((branch) => branch.name);
 
-    // Should include the branches we created in our test repo
-    expect(branchNames).toContain("main");
-    expect(branchNames).toContain("feature/user-auth");
-    expect(branchNames).toContain("feature/api-endpoints");
     expect(branchNames).toContain("old/legacy-code");
   });
 });

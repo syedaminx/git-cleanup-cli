@@ -43,28 +43,28 @@ describe("getFilterDescription", () => {
 	it("should return description for all branches", () => {
 		const result = getFilterDescription(false, false, 30);
 		expect(result).toBe(
-			"\n🔍 Analyzing branches that have been stale for 30 days...\n",
+			"\n🔍 Analyzing branches that have been stale for 30+ days...\n",
 		);
 	});
 
 	it("should return description for merged branches only", () => {
 		const result = getFilterDescription(false, true, 15);
 		expect(result).toBe(
-			"\n🔍 Analyzing merged branches that have been stale for 15 days...\n",
+			"\n🔍 Analyzing merged branches that have been stale for 15+ days...\n",
 		);
 	});
 
 	it("should return description for my branches only", () => {
 		const result = getFilterDescription(true, false, 7);
 		expect(result).toBe(
-			"\n🔍 Analyzing your branches that have been stale for 7 days...\n",
+			"\n🔍 Analyzing your branches that have been stale for 7+ days...\n",
 		);
 	});
 
 	it("should return description for my merged branches", () => {
 		const result = getFilterDescription(true, true, 60);
 		expect(result).toBe(
-			"\n🔍 Analyzing your merged branches that have been stale for 60 days...\n",
+			"\n🔍 Analyzing your merged branches that have been stale for 60+ days...\n",
 		);
 	});
 

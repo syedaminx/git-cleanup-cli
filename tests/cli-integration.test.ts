@@ -20,7 +20,7 @@ describe("CLI Integration Tests", () => {
 		expect(result.stdout).toContain(
 			"Analyzing branches that have been stale for",
 		);
-		expect(result.stdout).toContain("30 days");
+		expect(result.stdout).toContain("30+ days");
 	});
 
 	it("should list stale branches with custom threshold", () => {
@@ -30,7 +30,7 @@ describe("CLI Integration Tests", () => {
 		expect(result.stdout).toContain(
 			"Analyzing branches that have been stale for",
 		);
-		expect(result.stdout).toContain("7 days");
+		expect(result.stdout).toContain("7+ days");
 	});
 
 	it("should display branch table with correct columns", () => {
@@ -102,9 +102,9 @@ describe("CLI Integration Tests", () => {
 		expect(result.stderr.length).toBeGreaterThan(0);
 	});
 
-	it("should filter to only merged branches with --merged", () => {
+	it("should filter to only merged branches with --only-merged", () => {
 		const allBranchesResult = runCLI("list --stale-days 365");
-		const onlyMergedResult = runCLI("list --stale-days 365 --merged");
+		const onlyMergedResult = runCLI("list --stale-days 365 --only-merged");
 
 		expect(allBranchesResult.exitCode).toBe(0);
 		expect(onlyMergedResult.exitCode).toBe(0);
@@ -127,23 +127,25 @@ describe("CLI Integration Tests", () => {
 		);
 	});
 
-	it("should support --merged=true and --merged=false explicitly", () => {
-		const mergedTrueResult = runCLI("list --stale-days 365 --merged=true");
-		const mergedFalseResult = runCLI("list --stale-days 365 --merged=false");
+	it("should support --only-merged=true and --only-merged=false explicitly", () => {
+		const mergedTrueResult = runCLI("list --stale-days 365 --only-merged=true");
+		const mergedFalseResult = runCLI(
+			"list --stale-days 365 --only-merged=false",
+		);
 		const noFlagResult = runCLI("list --stale-days 365");
 
 		expect(mergedTrueResult.exitCode).toBe(0);
 		expect(mergedFalseResult.exitCode).toBe(0);
 		expect(noFlagResult.exitCode).toBe(0);
 
-		// --merged=true should show "merged branches" message
+		// --only-merged=true should show "merged branches" message
 		expect(mergedTrueResult.stdout).toContain("Analyzing merged branches");
 
-		// --merged=false should show regular message (same as no flag)
+		// --only-merged=false should show regular message (same as no flag)
 		expect(mergedFalseResult.stdout).not.toContain("Analyzing merged branches");
 		expect(noFlagResult.stdout).not.toContain("Analyzing merged branches");
 
-		// --merged=false should give same results as no flag
+		// --only-merged=false should give same results as no flag
 		expect(mergedFalseResult.stdout).toBe(noFlagResult.stdout);
 	});
 

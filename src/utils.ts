@@ -64,5 +64,7 @@ export const getFilterDescription = (
 		key = "all_branches";
 	}
 
-	return `\n🔍 Analyzing ${FILTER_DESCRIPTIONS[key]} that have been stale for ${pluralize("day", staleDays)}...\n`;
+	const daysCount = staleDays === 1 ? "1 day" : `${staleDays}+ days`;
+
+	return `\n🔍 Analyzing ${FILTER_DESCRIPTIONS[key]} that have been stale for ${daysCount}...\n`;
 };

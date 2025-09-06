@@ -18,7 +18,7 @@ export const listBranches = (staleDays: number = 30) => {
 
   const table = new Table({
     head: ["Branch", "Last Commit", "Merged", "Commits Behind Main"],
-    colWidths: [25, 12, 12, 15, 20],
+    wordWrap: true,
   });
 
   branches.forEach((branch) => {

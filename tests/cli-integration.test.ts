@@ -20,7 +20,7 @@ describe("CLI Integration Tests", () => {
 		expect(result.stdout).toContain(
 			"Analyzing branches that have been stale for",
 		);
-		expect(result.stdout).toContain("30 days");
+		expect(result.stdout).toContain("30+ days");
 	});
 
 	it("should list stale branches with custom threshold", () => {
@@ -30,7 +30,7 @@ describe("CLI Integration Tests", () => {
 		expect(result.stdout).toContain(
 			"Analyzing branches that have been stale for",
 		);
-		expect(result.stdout).toContain("7 days");
+		expect(result.stdout).toContain("7+ days");
 	});
 
 	it("should display branch table with correct columns", () => {

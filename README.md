@@ -2,6 +2,8 @@
 
 A command-line tool to identify and clean up stale Git branches in your repositories.
 
+![Demo](docs/demo.gif)
+
 ## Features
 
 - Identifies branches that haven't been updated in a specified time period

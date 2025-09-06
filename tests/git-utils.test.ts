@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 import {
 	analyzeBranches,
+	deleteBranch,
 	getCommitsBehindMain,
 	getLastCommitInfo,
 	isBranchMerged,
@@ -219,5 +220,102 @@ describe("analyzeBranches", () => {
 		const branchNames = result.map((branch) => branch.name);
 
 		expect(branchNames).toContain("old/legacy-code");
+	});
+});
+
+describe("deleteBranch", () => {
+	useTestRepo();
+
+	it("should successfully delete an existing branch", () => {
+		// Create a test branch first
+		runGitCommand("git checkout -b test-delete-branch");
+		runGitCommand("git checkout main");
+
+		// Verify the branch exists
+		const branchesBeforeDelete = runGitCommand("git branch");
+		expect(branchesBeforeDelete).toContain("test-delete-branch");
+
+		// Delete the branch
+		const result = deleteBranch("test-delete-branch");
+		expect(result).toBe(true);
+
+		// Verify the branch is gone
+		const branchesAfterDelete = runGitCommand("git branch");
+		expect(branchesAfterDelete).not.toContain("test-delete-branch");
+	});
+
+	it("should force delete unmerged branch with force=true (default)", () => {
+		// Create a test branch with unmerged changes
+		runGitCommand("git checkout -b test-unmerged-branch");
+		runGitCommand("git commit --allow-empty -m 'Unmerged commit'");
+		runGitCommand("git checkout main");
+
+		// Verify the branch exists and is unmerged
+		const branchesBeforeDelete = runGitCommand("git branch");
+		expect(branchesBeforeDelete).toContain("test-unmerged-branch");
+
+		// Delete the branch (should succeed with force=true default)
+		const result = deleteBranch("test-unmerged-branch");
+		expect(result).toBe(true);
+
+		// Verify the branch is gone
+		const branchesAfterDelete = runGitCommand("git branch");
+		expect(branchesAfterDelete).not.toContain("test-unmerged-branch");
+	});
+
+	it("should fail to delete unmerged branch with force=false", () => {
+		// Create a test branch with unmerged changes
+		runGitCommand("git checkout -b test-unmerged-safe-delete");
+		runGitCommand("git commit --allow-empty -m 'Unmerged commit'");
+		runGitCommand("git checkout main");
+
+		// Attempt to delete without force should throw an error
+		expect(() => deleteBranch("test-unmerged-safe-delete", false)).toThrow(
+			"Failed to delete branch test-unmerged-safe-delete",
+		);
+
+		// Verify the branch still exists
+		const branchesAfterAttempt = runGitCommand("git branch");
+		expect(branchesAfterAttempt).toContain("test-unmerged-safe-delete");
+
+		// Clean up - force delete the branch
+		deleteBranch("test-unmerged-safe-delete", true);
+	});
+
+	it("should throw error when trying to delete non-existent branch", () => {
+		expect(() => deleteBranch("non-existent-branch")).toThrow(
+			"Failed to delete branch non-existent-branch",
+		);
+	});
+
+	it("should throw error when trying to delete current branch", () => {
+		// Get current branch
+		const currentBranch = runGitCommand("git branch --show-current");
+
+		expect(() => deleteBranch(currentBranch)).toThrow(
+			`Failed to delete branch ${currentBranch}`,
+		);
+	});
+
+	it("should successfully delete merged branch with force=false", () => {
+		// Create and merge a test branch
+		runGitCommand("git checkout -b test-merged-branch");
+		runGitCommand("git commit --allow-empty -m 'Test commit'");
+		runGitCommand("git checkout main");
+		runGitCommand(
+			"git merge test-merged-branch --no-ff -m 'Merge test branch'",
+		);
+
+		// Verify the branch exists
+		const branchesBeforeDelete = runGitCommand("git branch");
+		expect(branchesBeforeDelete).toContain("test-merged-branch");
+
+		// Delete with force=false should work for merged branches
+		const result = deleteBranch("test-merged-branch", false);
+		expect(result).toBe(true);
+
+		// Verify the branch is gone
+		const branchesAfterDelete = runGitCommand("git branch");
+		expect(branchesAfterDelete).not.toContain("test-merged-branch");
 	});
 });

@@ -93,3 +93,13 @@ export const analyzeBranches = (staleDays: number = 30) => {
 
 	return branchInfo;
 };
+
+export const deleteBranch = (branchName: string, force: boolean = true) => {
+	const deleteFlag = force ? "-D" : "-d";
+	try {
+		runGitCommand(`git branch ${deleteFlag} ${branchName}`);
+		return true;
+	} catch (error) {
+		throw new Error(`Failed to delete branch ${branchName}: ${error}`);
+	}
+};

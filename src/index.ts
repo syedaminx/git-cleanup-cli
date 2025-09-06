@@ -20,7 +20,7 @@ program
 	)
 	.action(async (options) => {
 		const staleDays = parseInt(options.staleDays, 10);
-		listBranches(staleDays);
+		await listBranches(staleDays);
 	});
 
 program.parse(process.argv);

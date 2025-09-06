@@ -57,7 +57,7 @@ export const getCommitsBehindMain = (
 	}
 };
 
-export const analyzeBranches = (staleDays: number = 30) => {
+export const analyzeBranches = (staleDays = 30, mergedOnly = false) => {
 	const branches = getAllGitBranches();
 	const currentBranch = runGitCommand("git branch --show-current").trim();
 	const mainBranch = "main";
@@ -74,6 +74,10 @@ export const analyzeBranches = (staleDays: number = 30) => {
 			if (!isStale) continue;
 
 			const isMerged = isBranchMerged(branch, mainBranch);
+
+			// If mergedOnly is true, skip branches that aren't merged
+			if (mergedOnly && !isMerged) continue;
+
 			const commitsBehindMain = getCommitsBehindMain(branch, mainBranch);
 			const isCurrent = branch === currentBranch;
 

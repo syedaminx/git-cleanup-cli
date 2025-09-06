@@ -10,19 +10,7 @@ export const listBranches = async (
 	mergedOnly = false,
 	myBranchesOnly = false,
 ) => {
-	let filterDescription = `\n🔍 Analyzing`;
-
-	if (myBranchesOnly && mergedOnly) {
-		filterDescription += ` your merged branches`;
-	} else if (myBranchesOnly) {
-		filterDescription += ` your branches`;
-	} else if (mergedOnly) {
-		filterDescription += ` merged branches`;
-	} else {
-		filterDescription += ` branches`;
-	}
-
-	filterDescription += ` that have been stale for ${pluralize("day", staleDays)}...\n`;
+	const filterDescription = getFilterDescription(myBranchesOnly, mergedOnly, staleDays);
 
 	console.log(chalk.blue(filterDescription));
 
@@ -61,6 +49,28 @@ export const listBranches = async (
 	if (shouldDelete) {
 		await chooseDeletionMethod(branches);
 	}
+};
+
+const getFilterDescription = (myBranchesOnly: boolean, mergedOnly: boolean, staleDays: number) => {
+  const filters = {
+    'all_branches': 'branches',
+    'merged_only': 'merged branches', 
+    'my_branches_only': 'your branches',
+    'my_merged_branches': 'your merged branches'
+  };
+  
+  let key: keyof typeof filters;
+  if (myBranchesOnly && mergedOnly) {
+    key = 'my_merged_branches';
+  } else if (myBranchesOnly) {
+    key = 'my_branches_only';
+  } else if (mergedOnly) {
+    key = 'merged_only';
+  } else {
+    key = 'all_branches';
+  }
+  
+  return `\n🔍 Analyzing ${filters[key]} that have been stale for ${pluralize("day", staleDays)}...\n`;
 };
 
 const chooseDeletionMethod = async (branches: BranchInfo[]) => {

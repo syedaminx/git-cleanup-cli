@@ -7,12 +7,15 @@ import path from "node:path";
  * @param options - Additional options
  * @returns Object containing stdout, stderr, and exitCode
  */
-export const runCLI = (command: string, options: { timeout?: number; input?: string } = {}) => {
+export const runCLI = (
+	command: string,
+	options: { timeout?: number; input?: string } = {},
+) => {
 	// Get the project root directory (3 levels up from tests/utils/cli-helpers.ts)
 	const projectRoot = path.resolve(__dirname, "../..");
 	const cliPath = path.resolve(projectRoot, "dist/index.js");
 	const fullCommand = `node ${cliPath} ${command}`;
-	
+
 	try {
 		const result = execSync(fullCommand, {
 			encoding: "utf8",
@@ -20,24 +23,29 @@ export const runCLI = (command: string, options: { timeout?: number; input?: str
 			input: options.input || "\n", // Provide default input to avoid hanging
 			stdio: ["pipe", "pipe", "pipe"],
 		});
-		
+
 		return {
 			stdout: result.toString(),
 			stderr: "",
 			exitCode: 0,
 		};
 	} catch (error: unknown) {
-		const execError = error as { stdout?: Buffer; stderr?: Buffer; status?: number; signal?: string };
-		
+		const execError = error as {
+			stdout?: Buffer;
+			stderr?: Buffer;
+			status?: number;
+			signal?: string;
+		};
+
 		// Handle timeout as a special case
-		if (execError.signal === 'SIGTERM') {
+		if (execError.signal === "SIGTERM") {
 			return {
 				stdout: execError.stdout?.toString() || "",
 				stderr: "Command timed out",
 				exitCode: 124, // Common timeout exit code
 			};
 		}
-		
+
 		return {
 			stdout: execError.stdout?.toString() || "",
 			stderr: execError.stderr?.toString() || "",
@@ -64,33 +72,39 @@ export const runCLIWithInput = (command: string, inputs: string[]) => {
  */
 export const parseCLIOutput = (output: string) => {
 	const lines = output.split("\n");
-	
+
 	// Find the table start (after the headers)
-	const tableStartIndex = lines.findIndex(line => 
-		line.includes("Branch") && line.includes("Last Commit") && line.includes("Merged")
+	const tableStartIndex = lines.findIndex(
+		(line) =>
+			line.includes("Branch") &&
+			line.includes("Last Commit") &&
+			line.includes("Merged"),
 	);
-	
+
 	if (tableStartIndex === -1) {
 		return {
 			message: output.trim(),
 			branches: [],
 		};
 	}
-	
+
 	const branches: Array<{
 		name: string;
 		lastCommit: string;
 		merged: string;
 		commitsBehind: string;
 	}> = [];
-	
+
 	// Parse table rows (skip header and separator lines)
 	for (let i = tableStartIndex + 2; i < lines.length; i++) {
 		const line = lines[i].trim();
 		if (!line || line.startsWith("│") === false) continue;
-		
+
 		// Simple table parsing - split by │ and clean up
-		const parts = line.split("│").map(part => part.trim()).filter(part => part);
+		const parts = line
+			.split("│")
+			.map((part) => part.trim())
+			.filter((part) => part);
 		if (parts.length >= 4) {
 			branches.push({
 				name: parts[0].replace("* ", ""), // Remove current branch indicator
@@ -100,7 +114,7 @@ export const parseCLIOutput = (output: string) => {
 			});
 		}
 	}
-	
+
 	return {
 		message: output.trim(),
 		branches,

@@ -4,7 +4,7 @@ import inquirer from "inquirer";
 import { analyzeBranches, deleteBranch } from "./git-utils";
 import type { BranchInfo } from "./types";
 
-export const listBranches = async (staleDays: number = 30) => {
+export const listBranches = async (staleDays = 30) => {
 	console.log(
 		chalk.blue(
 			`\n🔍 Analyzing branches that have been stale for ${staleDays} days...\n`,
@@ -90,7 +90,7 @@ const interactiveBranchDeletion = async (branches: BranchInfo[]) => {
 		return;
 	}
 
-	const { branchesToDelete }: { branchesToDelete: string[] } = await inquirer.prompt([
+	const { branchesToDelete } = await inquirer.prompt([
 		{
 			type: "checkbox",
 			name: "branchesToDelete",

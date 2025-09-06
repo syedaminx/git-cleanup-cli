@@ -94,7 +94,7 @@ export const analyzeBranches = (staleDays: number = 30) => {
 	return branchInfo;
 };
 
-export const deleteBranch = (branchName: string, force: boolean = true) => {
+export const deleteBranch = (branchName: string, force = true) => {
 	const deleteFlag = force ? "-D" : "-d";
 	try {
 		runGitCommand(`git branch ${deleteFlag} ${branchName}`);

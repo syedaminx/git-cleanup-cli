@@ -112,6 +112,8 @@ const interactiveBranchDeletion = async (branches: BranchInfo[]) => {
 	]);
 
 	if (branchesToDelete.length > 0) {
+		await confirmDeletion(branchesToDelete.length);
+
 		console.log(
 			chalk.yellow(
 				`\n🗑️  Deleting ${branchesToDelete.length} branch(es)...\n`,
@@ -122,12 +124,12 @@ const interactiveBranchDeletion = async (branches: BranchInfo[]) => {
   }
 };
 
-const deleteAllBranches = async (branches: BranchInfo[]) => {
+const confirmDeletion = async (branchCount: number) => {
   await inquirer.prompt([
     {
       type: "input",
       name: "confirmation",
-      message: `This will delete ALL stale branches. Type '${chalk.red("delete")}' to confirm:`,
+      message: `This will delete ${branchCount} branch${branchCount === 1 ? '' : 'es'}. Type '${chalk.red("delete")}' to confirm:`,
       validate: (input) => {
         if (input.toLowerCase() === "delete") {
           return true;
@@ -136,8 +138,9 @@ const deleteAllBranches = async (branches: BranchInfo[]) => {
       },
     },
   ]);
+};
 
-  // If we reach here, user typed "delete" correctly
+const deleteAllBranches = async (branches: BranchInfo[]) => {
   const deletableBranchNames = branches.reduce<string[]>((acc, branch) => {
     if (!branch.isCurrent) acc.push(branch.name);
     return acc;
@@ -147,6 +150,8 @@ const deleteAllBranches = async (branches: BranchInfo[]) => {
     console.log(chalk.yellow("\n⚠️  No branches available for deletion (current branch cannot be deleted).\n"));
     return;
   }
+
+  await confirmDeletion(deletableBranchNames.length);
 
   console.log(chalk.yellow(`\n🗑️  Deleting ${deletableBranchNames.length} branch(es)...\n`));
   

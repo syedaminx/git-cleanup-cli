@@ -2,6 +2,7 @@ import chalk from "chalk";
 import Table from "cli-table3";
 import inquirer from "inquirer";
 import { analyzeBranches } from "./git-utils";
+import type { BranchInfo } from "./types";
 
 export const listBranches = async (staleDays: number = 30) => {
   console.log(
@@ -44,11 +45,48 @@ export const listBranches = async (staleDays: number = 30) => {
     ]);
 
     if (shouldDelete) {
-      console.log(chalk.yellow("\n🚧 Branch deletion feature coming soon!\n"));
-      // TODO: Implement branch selection and deletion
+      await chooseDeletionMethod(branches);
     }
   } catch (error) {
     // Handle Ctrl+C or Ctrl+D (EOF/interrupt)
+    console.log(chalk.gray("Exiting...\n"));
+    process.exit(0);
+  }
+};
+
+const chooseDeletionMethod = async (branches: BranchInfo[]) => {
+  try {
+    const { deletionMethod } = await inquirer.prompt([
+      {
+        type: "list",
+        name: "deletionMethod",
+        message: "How would you like to delete the stale branches?",
+        choices: [
+          {
+            name: "📋 Interactively choose specific branches to delete",
+            value: "interactive",
+          },
+          {
+            name: `🗑️  Delete all ${branches.length} stale branches`,
+            value: "all",
+          },
+        ],
+        default: "interactive",
+      },
+    ]);
+
+    switch (deletionMethod) {
+      case "interactive":
+        console.log(chalk.yellow("\n🚧 Interactive selection coming soon!\n"));
+        // TODO: Implement interactive branch selection
+        break;
+      case "all":
+        console.log(chalk.yellow("\n🚧 Delete all branches coming soon!\n"));
+        // TODO: Implement delete all with confirmation
+        break;
+    }
+  } catch (error) {
+    // Handle Ctrl+C or Ctrl+D
     console.log(chalk.gray("Exiting...\n"));
     process.exit(0);
   }

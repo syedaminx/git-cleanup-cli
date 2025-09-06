@@ -41,3 +41,17 @@ export const isBranchMerged = (
     return false;
   }
 };
+
+export const getCommitsBehindMain = (
+  branchName: string,
+  mainBranch: string = "main"
+) => {
+  try {
+    const output = runGitCommand(
+      `git rev-list --count ${mainBranch}..${branchName}`
+    );
+    return parseInt(output.trim(), 10);
+  } catch {
+    return 0;
+  }
+};

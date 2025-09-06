@@ -55,4 +55,3 @@ export const listBranches = async (
 		await chooseDeletionMethod(branches);
 	}
 };
-

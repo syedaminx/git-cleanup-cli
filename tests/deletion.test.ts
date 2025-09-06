@@ -1,5 +1,5 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
-import { deleteBranches, deleteAllBranches } from "../src/deletion";
+import { deleteAllBranches, deleteBranches } from "../src/deletion";
 import * as gitUtils from "../src/git-utils";
 import type { BranchInfo } from "../src/types";
 
@@ -59,7 +59,7 @@ describe("deleteBranches", () => {
 		mockDeleteBranch.mockImplementation(() => true);
 
 		const branchesToDelete = ["feature/test-branch", "old/legacy-branch"];
-		
+
 		await deleteBranches(branchesToDelete);
 
 		// Verify deleteBranch was called for each branch
@@ -88,7 +88,7 @@ describe("deleteBranches", () => {
 			.mockImplementationOnce(() => true);
 
 		const branchesToDelete = ["protected-branch", "regular-branch"];
-		
+
 		await deleteBranches(branchesToDelete);
 
 		// Verify both branches were attempted
@@ -115,7 +115,7 @@ describe("deleteBranches", () => {
 
 	it("should handle empty branch list", async () => {
 		const mockDeleteBranch = vi.mocked(gitUtils.deleteBranch);
-		
+
 		await deleteBranches([]);
 
 		// Verify no deletion attempts were made
@@ -137,7 +137,7 @@ describe("deleteBranches", () => {
 			.mockImplementationOnce(() => true); // Third succeeds
 
 		const branchesToDelete = ["branch1", "branch2", "branch3"];
-		
+
 		await deleteBranches(branchesToDelete);
 
 		// Verify all branches were attempted

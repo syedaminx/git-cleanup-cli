@@ -18,7 +18,10 @@ export const chooseDeletionMethod = async (branches: BranchInfo[]) => {
 			choices: [
 				DELETION_METHODS.INTERACTIVE,
 				{
-					name: DELETION_METHODS.ALL.name.replace('{count}', branches.length.toString()),
+					name: DELETION_METHODS.ALL.name.replace(
+						"{count}",
+						branches.length.toString(),
+					),
 					value: DELETION_METHODS.ALL.value,
 				},
 			],
@@ -91,7 +94,9 @@ export const confirmDeletion = async (branchCount: number) => {
 			name: "confirmation",
 			message: `This will delete ${pluralize("branch", branchCount)}. Type '${chalk.red(PROMPTS.TYPE_DELETE_TO_CONFIRM)}' to confirm:`,
 			validate: (input) => {
-				if (input.toLowerCase() === PROMPTS.TYPE_DELETE_TO_CONFIRM.toLowerCase()) {
+				if (
+					input.toLowerCase() === PROMPTS.TYPE_DELETE_TO_CONFIRM.toLowerCase()
+				) {
 					return true;
 				}
 				return `You must type '${PROMPTS.TYPE_DELETE_TO_CONFIRM}' to confirm this action.`;

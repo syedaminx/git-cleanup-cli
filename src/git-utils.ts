@@ -43,7 +43,7 @@ const getCurrentGitUser = (): { name: string; email: string } => {
 	}
 };
 
-export const getLastCommitInfo = (branchName: string) => {
+const getLastCommitInfo = (branchName: string) => {
 	const output = runGitCommand(`git log --format="%H|%ci" -1 ${branchName}`);
 	const [hash, dateStr] = output.split("|");
 
@@ -53,10 +53,7 @@ export const getLastCommitInfo = (branchName: string) => {
 	};
 };
 
-export const isBranchMerged = (
-	branchName: string,
-	mainBranch: string = "main",
-) => {
+const isBranchMerged = (branchName: string, mainBranch: string = "main") => {
 	try {
 		// This command returns exit code 0 if branchName is an ancestor of mainBranch (i.e., merged)
 		runGitCommand(`git merge-base --is-ancestor ${branchName} ${mainBranch}`);
@@ -67,7 +64,7 @@ export const isBranchMerged = (
 	}
 };
 
-export const getCommitsBehindMain = (
+const getCommitsBehindMain = (
 	branchName: string,
 	mainBranch: string = "main",
 ) => {

@@ -15,6 +15,15 @@ const getAllGitBranches = () => {
   return branches
     .split("\n")
     .map((branch) => branch.replace(/^\*?\s+/, "")) // Remove * and whitespace
-    .filter((branch) => branch.length > 0) // Remove empty lines
-    .filter((branch) => !branch.startsWith("*")); // Skip current branch
+    .filter((branch) => branch.length > 0); // Remove empty lines
+};
+
+export const getLastCommitInfo = (branchName: string) => {
+  const output = runGitCommand(`git log --format="%H|%ci" -1 ${branchName}`);
+  const [hash, dateStr] = output.split("|");
+
+  return {
+    hash: hash?.trim(),
+    date: new Date(dateStr?.trim() || ""),
+  };
 };

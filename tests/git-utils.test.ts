@@ -1,6 +1,6 @@
 import { describe, it, expect } from "vitest";
 import { useTestRepo } from "./utils/test-helpers";
-import { runGitCommand } from "../src/git-utils";
+import { runGitCommand, getLastCommitInfo } from "../src/git-utils";
 
 describe("runGitCommand", () => {
   useTestRepo();
@@ -39,5 +39,22 @@ describe("runGitCommand", () => {
     expect(typeof result).toBe("string");
     // Should be empty since repo is clean
     expect(result).toBe("");
+  });
+});
+
+describe("getLastCommitInfo", () => {
+  useTestRepo();
+
+  it("should return commit info for a branch", () => {
+    const result = getLastCommitInfo("master");
+
+    expect(result.hash).toBeDefined();
+    expect(result.hash).toMatch(/^[a-f0-9]{40}$/); // Full git hash format
+    expect(result.date).toBeInstanceOf(Date);
+    expect(result.date.getTime()).toBeGreaterThan(0); // Valid date
+  });
+
+  it("should throw error for non-existent branch", () => {
+    expect(() => getLastCommitInfo("non-existent-branch")).toThrow();
   });
 });

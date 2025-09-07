@@ -83,7 +83,7 @@ describe("CLI Integration Tests", () => {
 		const result = runCLI("--help");
 
 		expect(result.exitCode).toBe(0);
-		expect(result.stdout).toContain("git-cleanup");
+		expect(result.stdout).toContain("branch-broom");
 		expect(result.stdout).toContain("clean up stale git branches");
 		expect(result.stdout).toContain("list");
 	});

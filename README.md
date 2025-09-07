@@ -1,4 +1,4 @@
-# Git Cleanup CLI
+# Branch Broom CLI
 
 A command-line tool to identify and clean up stale Git branches in your repositories.
 
@@ -14,7 +14,7 @@ A command-line tool to identify and clean up stale Git branches in your reposito
 ## Installation
 
 ```bash
-npm install -g git-cleanup-cli
+npm install -g branch-broom
 ```
 
 ## Quick Start
@@ -22,7 +22,7 @@ npm install -g git-cleanup-cli
 Navigate to any Git repository and run:
 
 ```bash
-git-cleanup list
+branch-broom list
 ```
 
 This will show all branches that are stale (older than 30 days by default).
@@ -34,13 +34,13 @@ This will show all branches that are stale (older than 30 days by default).
 #### List stale branches
 ```bash
 # Show branches stale for 30+ days (default)
-git-cleanup list
+branch-broom list
 
 # Show branches stale for 7+ days
-git-cleanup list --stale-days 7
+branch-broom list --stale-days 7
 
 # Show branches stale for 60+ days
-git-cleanup list -s 60
+branch-broom list -s 60
 ```
 
 ### Advanced Filtering
@@ -48,24 +48,24 @@ git-cleanup list -s 60
 #### Filter by merge status
 ```bash
 # Show only merged branches that are stale
-git-cleanup list --only-merged
+branch-broom list --only-merged
 
 # Explicitly show all branches (merged and unmerged)
-git-cleanup list --only-merged=false
+branch-broom list --only-merged=false
 ```
 
 #### Filter by author
 ```bash
 # Show only your own stale branches
-git-cleanup list --my-branches
+branch-broom list --my-branches
 
 # Combine filters: show your merged branches that are stale
-git-cleanup list --my-branches --only-merged
+branch-broom list --my-branches --only-merged
 ```
 
 ## Commands
 
-### `git-cleanup list`
+### `branch-broom list`
 
 List and optionally delete stale branches.
 

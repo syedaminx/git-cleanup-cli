@@ -1,6 +1,6 @@
 #!/bin/bash
 
-# Script to generate a test git repository with branches for testing git-cleanup-cli
+# Script to generate a test git repository with branches for testing branch-broom
 
 REPOS_DIR="$(dirname "$0")/../repos"
 mkdir -p "$REPOS_DIR"

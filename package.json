@@ -1,6 +1,6 @@
 {
   "name": "branch-broom",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "main": "index.js",
   "scripts": {
     "build": "tsc",
@@ -16,10 +16,24 @@
   "bin": {
     "branch-broom": "./dist/index.js"
   },
-  "keywords": [],
+  "keywords": [
+    "git",
+    "branch",
+    "cleanup",
+    "cli",
+    "tool"
+  ],
   "author": "Syed Amin",
   "license": "MIT",
-  "description": "",
+  "description": "A command-line tool to identify and clean up stale Git branches in your repositories",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/syedaminx/branch-broom.git"
+  },
+  "homepage": "https://github.com/syedaminx/branch-broom#readme",
+  "bugs": {
+    "url": "https://github.com/syedaminx/branch-broom/issues"
+  },
   "devDependencies": {
     "@biomejs/biome": "^2.2.3",
     "@types/inquirer": "^9.0.9",

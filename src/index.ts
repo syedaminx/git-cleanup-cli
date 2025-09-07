@@ -35,7 +35,7 @@ process.on("uncaughtException", (error) => {
 const program = new Command();
 
 program
-	.name("git-cleanup")
+	.name("branch-broom")
 	.description("CLI tool to clean up stale git branches")
 	.version(version);
 

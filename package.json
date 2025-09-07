@@ -1,5 +1,5 @@
 {
-  "name": "git-cleanup-cli",
+  "name": "branch-broom",
   "version": "1.0.0",
   "main": "index.js",
   "scripts": {
@@ -14,7 +14,7 @@
     "seed": "rm -rf tests/repos && ./tests/scripts/generate-test-repo.sh"
   },
   "bin": {
-    "git-cleanup": "./dist/index.js"
+    "branch-broom": "./dist/index.js"
   },
   "keywords": [],
   "author": "",

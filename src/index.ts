@@ -1,9 +1,16 @@
 #!/usr/bin/env node
 
+import { readFileSync } from "node:fs";
+import { join } from "node:path";
 import chalk from "chalk";
 import { Command } from "commander";
 import { listBranches } from "./commands";
 import { EXITING_MESSAGE } from "./constants";
+
+// Read version from package.json
+const packageJsonPath = join(__dirname, "../package.json");
+const packageJson = JSON.parse(readFileSync(packageJsonPath, "utf-8"));
+const version = packageJson.version;
 
 // Global process event handlers for graceful exit
 process.on("SIGINT", () => {
@@ -30,7 +37,7 @@ const program = new Command();
 program
 	.name("git-cleanup")
 	.description("CLI tool to clean up stale git branches")
-	.version("1.0.0");
+	.version(version);
 
 program
 	.command("list")

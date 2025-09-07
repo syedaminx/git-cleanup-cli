@@ -17,8 +17,8 @@
     "branch-broom": "./dist/index.js"
   },
   "keywords": [],
-  "author": "",
-  "license": "ISC",
+  "author": "Syed Amin",
+  "license": "MIT",
   "description": "",
   "devDependencies": {
     "@biomejs/biome": "^2.2.3",

@@ -1,4 +1,4 @@
-# Git Cleanup CLI
+# Branch Broom CLI
 
 A command-line tool to identify and clean up stale Git branches in your repositories.
 
